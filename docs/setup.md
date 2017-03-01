@@ -47,14 +47,23 @@ Any piece of chaincode that you write will need to import the chaincode shim fro
 
 ##### Instructions
 
+<<<<<<< HEAD
+Three different releases of the fabric are linked above. The release you choose needs to match the Hyperledger network you are deploying your chaincode onto. You will need to make sure that the fabric release you choose is stored under `$GOPATH/src/hyperledger/fabric`.
+=======
 Three different releases of the fabric are linked above.  The release you choose needs to match the Hyperledger network you are deploying your chaincode onto.  You will need to make sure that the fabric release you choose is stored under `$GOPATH/hyperledger/fabric`.
+>>>>>>> refs/heads/myfirts
 
 The instructions below should take you through the process of properly installing the v0.5 release on your `GOPATH`.
 ```
 
 # Create the parent directories on your GOPATH
+<<<<<<< HEAD
+mkdir -p $GOPATH/src/github.com/hyperledger
+cd $GOPATH/src/github.com/hyperledger
+=======
 mkdir -p $GOPATH/github.com/hyperledger
 cd $GOAPTH/github.com/hyperledger
+>>>>>>> refs/heads/myfirts
 
 # Clone the appropriate release codebase into $GOPATH/github.com/hyperledger/fabric
 # Note that the v0.5 release is a branch of the repository.  It is defined below after the -b argument
