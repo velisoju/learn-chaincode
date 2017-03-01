@@ -13,9 +13,10 @@ In order to support multiple versions of the Hyperledger fabric, this repository
   - Hyperledger fabric v0.5-developer-preview
   - IBM Bluemix Blockchain Service v0.4.2
 
-- [v2.0](https://github.com/ibm-blockchain/learn-chaincode/tree/v2.0) (Coming Soon)
+- [v2.0](https://github.com/ibm-blockchain/learn-chaincode/tree/v2.0)
 
   - Hyperledger fabric v0.6-developer-preview
+  - IBM Bluemix Blockchain Service v1.0.0
 
 If you'd like to just deploy the sample code without completing the tutorial, then use the following URLs for the path parameter when deploying via the fabric REST API. Choose the URL that corresponds to the branch you are using above.
 
@@ -60,15 +61,15 @@ The following tasks take you through the process of building a pipeline that wil
 - Test your chaincode using the fabric REST API.
 - Repeat.
 
-- Fork this repository to your GitHub account. This can be accomplished quickly by scrolling up and clicking the **Fork** button at the top of this repository.
+1. Fork this repository to your GitHub account. This can be accomplished quickly by scrolling up and clicking the __Fork__ button at the top of this repository.
 
   ![Fork Button Screenshot](imgs/fork.png)
 
-  "Forking" the repository means creating a copy of this repository under your GitHub account. Note that the fork will fork the entire repository including all the branches. Toggle the **Branch** button on the left to see the available branches.
+  "Forking" the repository means creating a copy of this repository under your GitHub account. Note that the fork will fork the entire repository including all the branches. Toggle the __Branch__ button on the left to see the available branches.
 
   ![Branch Button Screenshot](imgs/branch.png)
 
-- Clone your fork into your $GOPATH.
+2. Clone your fork into your $GOPATH.
 
   ```bash
   cd $GOPATH
@@ -81,9 +82,9 @@ The following tasks take you through the process of building a pipeline that wil
 
   Now, you have a copy of your fork on your machine. You will develop your chaincode by making changes to these local files, pushing them to your fork on GitHub, and then deploying the code onto your blockchain network using the REST API on one of your peers.
 
-- Notice that we have provided two different versions of the chaincode used in this tutorial: [Start](start/chaincode_start.go) - the skeleton chaincode from which you will start developing, and [Finished](finished/chaincode_finished.go) - the finished chaincode.
+3. Notice that we have provided two different versions of the chaincode used in this tutorial: [Start](start/chaincode_start.go) - the skeleton chaincode from which you will start developing, and [Finished](finished/chaincode_finished.go) - the finished chaincode.
 
-- Make sure it builds in your local environment:
+4. Make sure it builds in your local environment:
 
   - Open a terminal or command prompt
 
@@ -94,14 +95,14 @@ The following tasks take you through the process of building a pipeline that wil
 
   - It should compile with no errors/text. If not, make sure that you have correctly installed Go per the [development environment setup instructions](docs/setup.md).
 
-- Push the changes back to your fork on GitHub.
+5. Push the changes back to your fork on GitHub.
 
   ```bash
   cd $GOPATH/src/github.com/<YOUR_GITHUB_ID_HERE>/learn-chaincode/
   # See what files have changed locally.  You should see chaincode_start.go
   git status
   # Stage all changes in the local repository for commit
-  git add -all
+  git add --all
   # Commit all staged changes.  Insert a short description after the -m argument
   git commit -m "Compiled my code"
   # Push local commits back to https://github.com/<YOUR_GITHUB_ID_HERE>/learn-chaincode/
@@ -125,10 +126,10 @@ Init is called when you first deploy your chaincode. As the name implies, this f
 In your `chaincode_start.go` file, change the `Init` function so that it stores the first element in the `args` argument to the key "hello_world".
 
 ```go
-func (t *SimpleChaincode) Init(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
-    if len(args) != 1 {
-        return nil, errors.New("Incorrect number of arguments. Expecting 1")
-    }
+func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+	if len(args) != 1 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 1")
+	}
 
     err := stub.PutState("hello_world", []byte(args[0]))
     if err != nil {
@@ -148,8 +149,8 @@ This is done by using the stub function `stub.PutState`. The function interprets
 In your `chaincode_start.go` file, change the `Invoke` function so that it calls a generic write function.
 
 ```go
-func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
-    fmt.Println("invoke is running " + function)
+func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+	fmt.Println("invoke is running " + function)
 
     // Handle different functions
     if function == "init" {
@@ -166,6 +167,24 @@ func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, function string, args
 Now that it's looking for `write` let's make that function somewhere in your `chaincode_start.go` file.
 
 ```go
+<<<<<<< HEAD
+func (t *SimpleChaincode) write(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var key, value string
+	var err error
+	fmt.Println("running write()")
+
+	if len(args) != 2 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 2. name of the key and value to set")
+	}
+
+	key = args[0]                            //rename for fun
+	value = args[1]
+	err = stub.PutState(key, []byte(value))  //write the variable into the chaincode state
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+=======
 func (t *SimpleChaincode) write(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
     var key, value string
     var err error
@@ -182,6 +201,7 @@ func (t *SimpleChaincode) write(stub *shim.ChaincodeStub, args []string) ([]byte
         return nil, err
     }
     return nil, nil
+>>>>>>> refs/heads/myfirts
 }
 ```
 
@@ -194,8 +214,8 @@ As the name implies, `Query` is called whenever you query your chaincode's state
 In your `chaincode_start.go` file, change the `Query` function so that it calls a generic read function, similar to what you did in `Invoke`.
 
 ```go
-func (t *SimpleChaincode) Query(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
-    fmt.Println("query is running " + function)
+func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+	fmt.Println("query is running " + function)
 
     // Handle different functions
     if function == "read" {                            //read a variable
@@ -210,9 +230,9 @@ func (t *SimpleChaincode) Query(stub *shim.ChaincodeStub, function string, args 
 Now that it's looking for `read`, let's create that helper function somewhere in your `chaincode_start.go` file.
 
 ```go
-func (t *SimpleChaincode) read(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
-    var key, jsonResp string
-    var err error
+func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var key, jsonResp string
+	var err error
 
     if len(args) != 1 {
         return nil, errors.New("Incorrect number of arguments. Expecting name of the key to query")
@@ -250,7 +270,7 @@ If you're stuck or confused at any point, just go check out the `chaincode_finis
 
 # Interacting with Your First Chaincode
 
-The fastest way to test your chaincode is to use the REST interface on your peers. If you're using the blockchain service on Bluemix, you should follow the steps described [here](https://new-console.ng.bluemix.net/docs/services/blockchain/ibmblockchain_tutorials.html). Otherwise, we recommend using a tool like Postman, as described in the [environment setup documentation](docs/setup.md). There are two REST endpoints we will be interacting with: `/chaincode` and `/registrar`.
+The fastest way to test your chaincode is to use the REST interface on your peers. If you're using the blockchain service on Bluemix, you should follow the steps described [here](https://console.ng.bluemix.net/docs/services/blockchain/ibmblockchain_tutorials.html). Otherwise, we recommend using a tool like Postman, as described in the [environment setup documentation](docs/setup.md). There are two REST endpoints we will be interacting with: `/chaincode` and `/registrar`.
 
 - `/chaincode` is the endpoint used for deploying, invoking, and querying chaincode. Which operation you perform is controlled by the body of the request that you send.
 - `/registrar` allows you to enroll users. Why does this matter? Read on!
@@ -259,7 +279,11 @@ The fastest way to test your chaincode is to use the REST interface on your peer
 
 Calls to the `/chaincode` endpoint of the REST interface require a secure context ID to be included in the body of the request. This means that you must first enroll a user from the user list in the membership service for your network.
 
+<<<<<<< HEAD
+- Find an available user to enroll on one of your peers. This will most likely require you to grab a user from the [membersrvc.yaml](https://github.com/hyperledger/fabric/blob/v0.6/membersrvc/membersrvc.yaml#L199) file for your network. That link points to an example file from the fabric repository. Unless you are running on Bluemix, it is most likely that you will have the same users in your membership service as the ones listed in that file. Look for the section that has a list of users like this:
+=======
 - Find an available user to enroll on one of your peers. This will most likely require you to grab a user from the [membersrvc.yaml](https://github.com/hyperledger/fabric/blob/v0.6/membersrvc/membersrvc.yaml#L199) file for your network. Look for the section that has a list of users like this:
+>>>>>>> refs/heads/myfirts
 
   ```
   ...
@@ -268,18 +292,17 @@ Calls to the `/chaincode` endpoint of the REST interface require a secure contex
   test_user2: 1 zMflqOKezFiA bank_c        00008
   ...
   ```
-
-- Open up a notepad and copy one set of credentials. You will need them later.
+- All we care about are the usernames and secrets for these users. Open up a notepad and copy one set of credentials. You will use them to enroll the user.
 
   ```
   test_user0 MS9qrN8hFjlE
   ```
 
-- Create a POST request like the example below.
+- Create an enrollment POST request in Postman like the example below.
 
   ![/registrar POST](imgs/registrar_post.png)
 
-  The url indicates that the REST port for one of my Bluemix peers is accessible at `b88037dd5b6d423caf5258c6b7b15f5a-vp3.dev.blockchain.ibm.com:443`. This is the api URL for vp3\. You would find this information on the **Service Credentials** tab of the Blockchain dashboard or the **Network** tab of your Bluemix console. This specific registration is being sent to vp3, but it could be directed at any network peer.
+- You can see that we sent the username and secret to the `/registrar` endpoint of a peer. If you're wondering where the rest of that url came from, it came from my blockchain Bluemix service credentials. You can find this information yourself on the **Service Credentials** tab of the blockchain service on your Bluemix dashboard or the **Network** tab of your blockchain service dashboard.
 
 - The body for the request:
 
@@ -290,7 +313,7 @@ Calls to the `/chaincode` endpoint of the REST interface require a secure contex
   }
   ```
 
-- Send the request. If everything goes smoothly, you will see a response like the one below
+- Send the request. If everything goes smoothly, you will see a response like the one below:
 
   ![/registrar response](imgs/registrar_post_response.png)
 
